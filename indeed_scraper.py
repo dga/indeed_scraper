@@ -4,6 +4,29 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def craft_base_url(location=None, radius=None, salary=None, job_type=None, exp_level=None, sort_by_date=None):
+    url = f'https://www.indeed.com/'
+
+    if location:
+        url += 'jobs?q='
+        if salary:
+            url += f'${salary}'
+        if location:
+            url += f'&l={location}'
+        if radius:
+            url += f'&radius={str(radius)}'
+        if job_type:
+            url += f'&jt={job_type}'
+        if exp_level:
+            url += f'&explvl={exp_level}'
+        if sort_by_date:
+            url += '&sort=date'
+    else:
+        url += '?sq = 1'
+
+    return url
+
+
 def scrape_jobs(num_pages):
     base_url = 'http://indeed.com/jobs?q=&l=Folsom%2C+CA'
     jobs_list = []
@@ -64,4 +87,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    print(craft_base_url("folsom", 10, 20000, "fulltime", "senior_level", True))
+
+   # location = None, radius = None, salary = None, job_type = None, exp_level = None, sort_by_date = None):
