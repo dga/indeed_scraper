@@ -18,7 +18,7 @@ def timer(func):
         result = func(*args, **kwargs)
         end_time = time.perf_counter()
         run_time = end_time - start_time
-        print(f'Finished scraping in {run_time:4f} secs')
+        print(f'{run_time:4f} secs')
         return result
     return wrapper_timer
 
@@ -145,12 +145,14 @@ def main():
             job_results.append(job)
 
     if job_results:
-        print(
-            f"Returning {len(job_results)} jobs containing '{search_term}'...\n")
         for job in job_results:
             print(str(job), end='\n\n')
+        print(
+            f"\nReturned {len(job_results)} jobs containing '{search_term}' in ", end='')
+
     else:
-        print(f"No jobs found containing '{search_term}'.")
+        print(
+            f"\nNo jobs found containing '{search_term}' were found in ", end='')
 
 
 if __name__ == '__main__':
