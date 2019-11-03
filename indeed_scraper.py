@@ -1,10 +1,26 @@
 import pprint
+import time
+import functools
 import argparse
 import os
 import json
 from collections import OrderedDict
+from tqdm import tqdm
 import requests
 from bs4 import BeautifulSoup
+
+
+def timer(func):
+    '''Print the runtime of the decorated function'''
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        run_time = end_time - start_time
+        print(f'Finished scraping in {run_time:4f} secs')
+        return result
+    return wrapper_timer
 
 
 def save_config(parsed_args):
@@ -71,7 +87,7 @@ def scrape_jobs(base_url, num_pages):
     # base_url = 'http://indeed.com/jobs?q=&l=Folsom%2C+CA'
     jobs_list = []
 
-    for i in range(num_pages):
+    for i in tqdm(range(num_pages)):
         modified_url = base_url + f'&start={i * 10}'
         res = requests.get(modified_url)
         soup = BeautifulSoup(res.text, 'lxml')
@@ -107,6 +123,7 @@ def scrape_jobs(base_url, num_pages):
     return jobs_list
 
 
+@timer
 def main():
     args = parse_args()
 
@@ -118,8 +135,8 @@ def main():
     save_config(args)
 
     base_url = craft_base_url(**args)
-    jobs = scrape_jobs(base_url, int(input("How many pages? ")))
     search_term = input("Search term: ")
+    jobs = scrape_jobs(base_url, int(input("Number of pages to scrape: ")))
 
     job_results = []
 
