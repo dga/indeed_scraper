@@ -1,13 +1,12 @@
-import pprint
-import time
-import functools
-import argparse
 import os
+import time
 import json
-from collections import OrderedDict
-from tqdm import tqdm
+import argparse
+import functools
 import requests
 from bs4 import BeautifulSoup
+from collections import OrderedDict
+from tqdm import tqdm
 
 
 def timer(func):
@@ -21,6 +20,16 @@ def timer(func):
         print(f'{run_time:4f} secs')
         return result
     return wrapper_timer
+
+
+def print_jobs(jobs_list):
+    for i, job in enumerate(jobs_list):
+        print(f"\n[{i + 1}]\n\nTitle: {job['Title']}\nCompany: {job['Company']}")
+        if (job['Salary']):
+            print(f"Salary: {job['Salary']}")
+        print(f"\nSummary: {job['Summary']}\n\nURL: {job['URL']}\n")
+        print('*' * 60)
+        print('*' * 60)
 
 
 def save_config(parsed_args):
@@ -145,8 +154,7 @@ def main():
             job_results.append(job)
 
     if job_results:
-        for job in job_results:
-            print(str(job), end='\n\n')
+        print_jobs(job_results)
         print(
             f"\nReturned {len(job_results)} jobs containing '{search_term}' in ", end='')
 
