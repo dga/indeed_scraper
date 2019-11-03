@@ -24,7 +24,8 @@ def timer(func):
 
 def print_jobs(jobs_list):
     for i, job in enumerate(jobs_list):
-        print(f"\n[{i + 1}]\n\nTitle: {job['Title']}\nCompany: {job['Company']}")
+        print(
+            f"\n[{i + 1}]\n\nTitle: {job['Title']}\nCompany: {job['Company']}\nLocation: {job['Location']}")
         if (job['Salary']):
             print(f"Salary: {job['Salary']}")
         print(f"\nSummary: {job['Summary']}\n\nURL: {job['URL']}\n")
@@ -93,7 +94,6 @@ def craft_base_url(location=None, radius=None, salary=None, job_type=None, exp_l
 
 
 def scrape_jobs(base_url, num_pages):
-    # base_url = 'http://indeed.com/jobs?q=&l=Folsom%2C+CA'
     jobs_list = []
 
     for i in tqdm(range(num_pages)):
@@ -119,6 +119,11 @@ def scrape_jobs(base_url, num_pages):
             if company.text:
                 company = company.text.strip()
 
+            location = item.find(class_='location')
+
+            if location.text:
+                location = location.text.strip()
+
             salary = item.find(class_='salaryText')
 
             if salary:
@@ -126,8 +131,8 @@ def scrape_jobs(base_url, num_pages):
 
             url = f"https://www.indeed.com{item.find('a').get('href')}"
 
-            jobs_list.append(OrderedDict([('Title', job_title), ('Summary', summary),
-                                          ('Company', company), ('Salary', salary), ('URL', url)]))
+            jobs_list.append(OrderedDict([('Title', job_title), ('Company', company), (
+                'Location', location), ('Summary', summary), ('Salary', salary), ('URL', url)]))
 
     return jobs_list
 
@@ -138,6 +143,7 @@ def main():
 
     if os.path.isfile('scrape_cfg.json'):
         saved_args = load_config()
+        # update saved_args with new args, excluding NoneType
         saved_args.update({k: v for k, v in args.items() if v is not None})
         args = saved_args
 
@@ -145,7 +151,15 @@ def main():
 
     base_url = craft_base_url(**args)
     search_term = input("Search term: ")
-    jobs = scrape_jobs(base_url, int(input("Number of pages to scrape: ")))
+
+    while True:
+        try:
+            num_pages = int(input("Number of pages to scrape: "))
+            break
+        except ValueError as e:
+            print(f"Error: {e}")
+
+    jobs = scrape_jobs(base_url, num_pages)
 
     job_results = []
 
