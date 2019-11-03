@@ -1,7 +1,40 @@
 import pprint
+import json
 from collections import OrderedDict
 import requests
 from bs4 import BeautifulSoup
+
+
+def save_config():
+    pass
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('location', help='city, state, or zipcode')
+    parser.add_argument(
+        '-r', '--radius', help='radius from location', type=int)
+    parser.add_argument('-s', '--salary', help='desired salary', type=int)
+    parser.add_argument(
+        '-j', '--job_type', help='fulltime, parttime, commission, temporary, contract, internship')
+    parser.add_argument('-e', '--exp_lvl',
+                        help='entry_level, mid_level, senior_level')
+    parser.add_argument(
+        '--sort', help='sort by date (most recent first)', action='store_true')
+    args = parser.parse_args()
+
+    args_dict = {
+        'location': args.location,
+        'radius': args.radius,
+        'salary': args.salary,
+        'job_type': args.job_type,
+        'exp_level': args.exp_lvl,
+        'sort_by_date': args.sort
+    }
+
+    return args_dict
 
 
 def craft_base_url(location=None, radius=None, salary=None, job_type=None, exp_level=None, sort_by_date=None):
@@ -27,8 +60,8 @@ def craft_base_url(location=None, radius=None, salary=None, job_type=None, exp_l
     return url
 
 
-def scrape_jobs(num_pages):
-    base_url = 'http://indeed.com/jobs?q=&l=Folsom%2C+CA'
+def scrape_jobs(base_url, num_pages):
+    # base_url = 'http://indeed.com/jobs?q=&l=Folsom%2C+CA'
     jobs_list = []
 
     for i in range(num_pages):
@@ -68,7 +101,9 @@ def scrape_jobs(num_pages):
 
 
 def main():
-    jobs = scrape_jobs(int(input("How many pages? ")))
+    args = parse_args()
+    base_url = craft_base_url(**args)
+    jobs = scrape_jobs(base_url, int(input("How many pages? ")))
     search_term = input("Search term: ")
 
     job_results = []
@@ -87,6 +122,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print(craft_base_url("folsom", 10, 20000, "fulltime", "senior_level", True))
-
-   # location = None, radius = None, salary = None, job_type = None, exp_level = None, sort_by_date = None):
+    main()
