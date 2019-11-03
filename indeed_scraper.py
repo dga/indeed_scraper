@@ -1,17 +1,24 @@
 import pprint
+import argparse
+import os
 import json
 from collections import OrderedDict
 import requests
 from bs4 import BeautifulSoup
 
 
-def save_config():
-    pass
+def save_config(parsed_args):
+    with open('scrape_cfg.json', 'w') as json_file:
+        json.dump(parsed_args, json_file)
+
+
+def load_config():
+    with open('scrape_cfg.json') as json_file:
+        options = json.load(json_file)
+    return options
 
 
 def parse_args():
-    import argparse
-
     parser = argparse.ArgumentParser()
     parser.add_argument('location', help='city, state, or zipcode')
     parser.add_argument(
@@ -102,6 +109,14 @@ def scrape_jobs(base_url, num_pages):
 
 def main():
     args = parse_args()
+
+    if os.path.isfile('scrape_cfg.json'):
+        saved_args = load_config()
+        saved_args.update({k: v for k, v in args.items() if v is not None})
+        args = saved_args
+
+    save_config(args)
+
     base_url = craft_base_url(**args)
     jobs = scrape_jobs(base_url, int(input("How many pages? ")))
     search_term = input("Search term: ")
@@ -116,7 +131,7 @@ def main():
         print(
             f"Returning {len(job_results)} jobs containing '{search_term}'...\n")
         for job in job_results:
-            print(str(job))
+            print(str(job), end='\n\n')
     else:
         print(f"No jobs found containing '{search_term}'.")
 
